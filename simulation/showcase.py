@@ -28,12 +28,16 @@ joint_indices = [i for i in range(num_joints)
                  if p.getJointInfo(arm_id, i)[2] != p.JOINT_FIXED]
 
 # you define these — example: 6 joints
-start_joint_angles = np.array([0.0] * len(joint_indices))          # all joints at 0
+start_joint_angles = np.array([0, 0, 0, 0, 180, 0])          # all joints at 0
 end_joint_angles = np.array([-0.5, -0.4, 0.4, -1.2, 1.4, 0.5])[:len(joint_indices)]  # customize this!
 
 # check if user provided fewer angles than joints
 if len(end_joint_angles) != len(joint_indices):
     raise ValueError(f"Expected {len(joint_indices)} joint angles, got {len(end_joint_angles)}.")
+
+# get movable joint indices
+joint_indices = [i for i in range(num_joints)
+                 if p.getJointInfo(arm_id, i)[2] != p.JOINT_FIXED]
 
 # simulate interpolation from start to end joint angles
 for t in range(_STEPS):

@@ -27,13 +27,31 @@ num_joints = p.getNumJoints(arm_id)
 joint_indices = [i for i in range(num_joints)
                  if p.getJointInfo(arm_id, i)[2] != p.JOINT_FIXED]
 
+# starting pose: gripper downwards
+starting_pose = np.array([0, 0, 0, 0, 90, 0])
+
+# apply the starting pose
+p.setJointMotorControlArray(
+    bodyUniqueId=arm_id,
+    jointIndices=joint_indices,
+    controlMode=p.POSITION_CONTROL,
+    targetPositions=starting_pose.tolist(),
+    forces=[50] * len(joint_indices),
+    positionGains=[0.05] * len(joint_indices)
+)
+
+# settle in starting pose
+for _ in range(100):
+    p.stepSimulation()
+    time.sleep(1. / 240.)
+
 # upright pose: hand lifted near head, palm out
 upright_pose = np.array([1.5, -1.2, 0.4, -1.5, 1.2, 0.0])[:len(joint_indices)]
 
 # move to upright pose
 for t in range(_STEPS):
     alpha = t / _STEPS
-    current_joint_angles = alpha * upright_pose
+    current_joint_angles = (1 - alpha) * starting_pose + alpha * upright_pose
 
     p.setJointMotorControlArray(
         bodyUniqueId=arm_id,
